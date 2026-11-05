@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "expand-contract-repair",
+  "fixtures": { "schema": "schema.sql", "seed": "seed.sql", "migration": "expand-contract.sql" },
+  "images": { "old": "rolloutproof-fixture:local", "new": "rolloutproof-fixture:local" },
+  "commands": {
+    "oldRead": ["node", "/app/contract.js", "old-read", "name"],
+    "newRead": ["node", "/app/contract.js", "new-read", "full_name"],
+    "newWrite": ["node", "/app/contract.js", "new-write", "both", "active"]
+  }
+}

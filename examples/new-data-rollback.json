@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "id": "new-data-breaks-rollback",
+  "fixtures": { "schema": "schema.sql", "seed": "seed.sql", "migration": "new-data.sql" },
+  "images": { "old": "rolloutproof-fixture:local", "new": "rolloutproof-fixture:local" },
+  "commands": {
+    "oldRead": ["node", "/app/contract.js", "old-read", "name"],
+    "newRead": ["node", "/app/contract.js", "new-read", "name"],
+    "newWrite": ["node", "/app/contract.js", "new-write", "name", "archived"]
+  }
+}

@@ -1,0 +1,39 @@
+{
+  "name": "@developer-pain-lab/rolloutproof",
+  "version": "0.1.0-alpha.0",
+  "description": "Rehearse migration-first deployment and application rollback with disposable PostgreSQL",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=22"
+  },
+  "bin": {
+    "rolloutproof": "src/cli.js"
+  },
+  "exports": "./src/index.js",
+  "files": [
+    "src",
+    "examples",
+    "docs",
+    "README.md",
+    "LICENSE",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "test": "node --test tests/*.test.js",
+    "test:integration": "node tests/integration.js",
+    "measure": "node examples/measure.js",
+    "check": "node scripts/check.js",
+    "pack:check": "node scripts/verify-package.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CVamsi27/rolloutproof.git"
+  },
+  "homepage": "https://github.com/CVamsi27/rolloutproof#readme",
+  "bugs": {
+    "url": "https://github.com/CVamsi27/rolloutproof/issues"
+  }
+}

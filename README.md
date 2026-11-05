@@ -20,7 +20,7 @@ The example target must be new. Container-backed commands below require OrbStack
 
 To use a tarball in another project, download this project's `.tgz` from its release and run `npm install --save-dev /absolute/path/to/the-downloaded.tgz`. The installed tarball exposes `rolloutproof`; prepare application images and synthetic contracts explicitly.
 
-See [contributing](CONTRIBUTING.md), [security reporting](SECURITY.md), [changes](CHANGELOG.md) and [verification](docs/verification.md). Platform and adoption claims remain limited to recorded observations. These are ESM packages; the verified type-consumer profile is ESM/NodeNext. CommonJS compatibility is not promised; use dynamic import where needed.
+See [contributing](CONTRIBUTING.md), [security reporting](SECURITY.md), [changes](CHANGELOG.md) and [verification](docs/verification.md). Platform and adoption claims remain limited to recorded observations. The JavaScript API is ESM. This alpha supplies no TypeScript declarations for this package; CommonJS compatibility is not promised.
 
 An experimental PostgreSQL/image adapter for migration-first deployment rehearsals, including **an old reader against data written by the new application**. This is a local prototype, not a migration engine or a production safety certificate.
 
@@ -51,7 +51,7 @@ npm run test:integration
 npm run measure
 ```
 
-For OrbStack on macOS, start its Linux engine with `orbctl start docker`, set `CONTAINER_CLI=/absolute/path/to/docker` to a Docker-compatible client and `CONTAINER_HOST="unix://${HOME}/.orbstack/run/docker.sock"` before the Node commands. For manual image commands, use `env -u DOCKER_CONTEXT DOCKER_HOST="$CONTAINER_HOST" "$CONTAINER_CLI"` in place of `docker` above. The endpoint is passed only to the client subprocess and overrides its `DOCKER_CONTEXT`; workers receive no host environment. Without overrides, normal `docker` client/context selection remains available. This macOS/OrbStack combination is verified; other engines, operating systems and Node versions remain unverified.
+For OrbStack on macOS, start its Linux engine with `orbctl start docker`, set `CONTAINER_CLI=/absolute/path/to/docker` to a Docker-compatible client and `CONTAINER_HOST="unix://${HOME}/.orbstack/run/docker.sock"` before the Node commands. For manual image commands, use `env -u DOCKER_CONTEXT DOCKER_HOST="$CONTAINER_HOST" "$CONTAINER_CLI"` in place of `docker` above. The endpoint is passed only to the client subprocess and overrides its `DOCKER_CONTEXT`; workers receive no host environment. Without overrides, normal `docker` client/context selection remains available. This macOS/OrbStack combination is verified; container profiles other than the tested OrbStack combination remain unverified; hosted source/package checks are listed below.
 
 The broken cases should exit `1`; their corrected controls should exit `0`. Missing Docker/images exit `2` and remain unobserved. `measure` emits JSON with real per-phase wall time when executable, otherwise an explicit blocked gate with no measurements. It does not substitute simulated timings.
 
@@ -114,3 +114,12 @@ The synthetic real suite passes; the next gate is integrating application-owned 
 ## Standalone project
 
 This folder owns its source, tests, synthetic SQL, fixture-image recipe, npm lockfile and development scripts. No lab checkout or sibling dependency is required. See [verification](docs/verification.md) and the [validation plan](docs/validation-plan.md).
+
+## Verified alpha profiles
+
+| Profile | Verified scope |
+| --- | --- |
+| Ubuntu 24.04, Node 24.22.1, hosted GitHub CI | Source checks and independent packed consumers |
+| macOS arm64, Node 24.22.1, OrbStack | Local declared container/browser integration described in verification |
+
+This hosted job does not run a Linux container engine. Real container compatibility remains the local macOS arm64 OrbStack profile. See [public alpha readiness](docs/public-alpha.md) for immutable CI evidence, distribution and remaining gates. Other runtime/OS/engine combinations remain unverified.

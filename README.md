@@ -17,6 +17,8 @@ test ! -e ./rollout-example && cp -R node_modules/@developer-pain-lab/rolloutpro
 
 Use the OrbStack steps below to prepare the local images. See [the pilot guide](docs/pilot.md), [contributing](CONTRIBUTING.md), and [verification](docs/verification.md).
 
+[Case study: a successful migration followed by a failed rollback](docs/case-study.md). Compare the four application and schema combinations and see which assertion fails after the new writer changes a row.
+
 ## Current evidence
 
 On 5 November 2026 the real PostgreSQL suite passed on macOS arm64 with OrbStack: all four scenarios (16 cells), expected broken/fixed assertions, complete declared coverage and successful cleanup. Every migration applied successfully; the new-data rollback failure appeared only when the old reader consumed the new writer's data. These are synthetic observations, not performance, independent integration or adoption evidence. Control-boundary tests remain separate from real SQL execution.

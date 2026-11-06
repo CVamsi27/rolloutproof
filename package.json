@@ -1,6 +1,6 @@
 {
   "name": "@developer-pain-lab/rolloutproof",
-  "version": "0.1.0-alpha.0",
+  "version": "0.1.0-alpha.1",
   "description": "Rehearse migration-first deployment and application rollback with disposable PostgreSQL",
   "type": "module",
   "license": "MIT",

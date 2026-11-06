@@ -10,7 +10,7 @@ test('installed command help exits successfully without contacting Docker', () =
   assert.match(result.stdout, /rolloutproof run --scenario/);
 });
 test('invalid scenario and unsupported flags fail setup with parseable JSON', () => {
-  for (const args of [['run', '--scenario', '/nonexistent/synthetic.json', '--json'], ['run', '--unexpected', '--json']]) {
+  for (const args of [['run', '--scenario', '/nonexistent/synthetic.json', '--json'], ['run', '--unexpected', '--json'], ['doctor', '--scenario', '/nonexistent/synthetic.json', '--json']]) {
     const result = spawnSync(process.execPath, [cli, ...args], { encoding: 'utf8', timeout: 2000 });
     assert.equal(result.status, 2);
     assert.equal(JSON.parse(result.stdout).execution, 'setup_failed');

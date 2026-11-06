@@ -5,7 +5,7 @@ export const PHASES = Object.freeze([
   { id: 'old-new', migrate: true, steps: ['old-read'] },
   { id: 'new-new', migrate: true, steps: ['new-read'] },
   { id: 'rollback-after-new-write', migrate: true, steps: ['new-read', 'new-write', 'old-read'] },
-]);
+].map(phase => Object.freeze({ ...phase, steps: Object.freeze(phase.steps) })));
 function reason(error) {
   return String(error?.message ?? 'Unknown execution failure').replace(/postgres(?:ql)?:\/\/[^\s]+/gi, '[database URL redacted]').replace(/[\x00-\x1f\x7f]/g, ' ').slice(0, 400);
 }
@@ -71,5 +71,5 @@ export async function rehearse(loaded, backend) {
   }
   const rank = { completed: 0, interrupted: 1, timed_out: 2, setup_failed: 3, blocked: 4 };
   const execution = phases.reduce((worst, phase) => rank[phase.execution] > rank[worst] ? phase.execution : worst, 'completed');
-  return { schemaVersion: 1, scenarioId: loaded.scenario.id, policy: 'migration-first-with-new-data-rollback', evidenceKind: backend.kind === 'docker' ? 'observed' : 'simulated', execution, coverage: phases.every(p => p.coverage === 'complete_for_declared_contracts') ? 'complete_for_declared_contracts' : 'partial', assertions: phases.some(p => p.assertions === 'failed') ? 'failed' : phases.every(p => p.assertions === 'passed') ? 'passed' : 'not_evaluated', cleanup: phases.some(p => p.cleanup === 'failed') ? 'failed' : 'completed', fixtureDigests: loaded.digests, phases, durationMs: Math.round(performance.now() - started), limitation: 'Only the supplied images, SQL fixtures, commands and declared assertions were exercised. No production or universal migration-safety claim.' };
+  return { schemaVersion: 1, scenarioId: loaded.scenario.id, policy: 'migration-first-with-new-data-rollback', evidenceKind: 'simulated', execution, coverage: phases.every(p => p.coverage === 'complete_for_declared_contracts') ? 'complete_for_declared_contracts' : 'partial', assertions: phases.some(p => p.assertions === 'failed') ? 'failed' : phases.every(p => p.assertions === 'passed') ? 'passed' : 'not_evaluated', cleanup: phases.some(p => p.cleanup === 'failed') ? 'failed' : 'completed', fixtureDigests: loaded.digests, phases, durationMs: Math.round(performance.now() - started), limitation: 'Only the supplied images, SQL fixtures, commands and declared assertions were exercised. No production or universal migration-safety claim.' };
 }

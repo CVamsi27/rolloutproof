@@ -1,5 +1,9 @@
 # Rolloutproof verification
 
+## Alpha.1 observed evidence and preflight — 6 November 2026
+
+Source checks passed 22 tests, including an injected backend labelled Docker, attempted rollback phase mutation and invalid preflight input. OrbStack verified all four PostgreSQL scenarios and the five-assertion isolation probe. The built-in runner produces observed evidence. Injected backends remain simulated. The valid scenario preflight resolved all required local image roles.
+
 ## Independent folder split — 5 November 2026
 
 The implementation moved from the lab's workspace into its own sibling project folder. It has its own package manifest, frozen npm lockfile, source, tests, examples, license, operating rules and development scripts. Package identity and public APIs are unchanged. No project imports another project or the lab at runtime.

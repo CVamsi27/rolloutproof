@@ -4,6 +4,7 @@ import { mkdtemp, writeFile, symlink, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { loadScenario, rehearse, runScenario, exitCode } from '../src/index.js';
+import { PHASES } from '../src/rehearse.js';
 
 function scenario() {
   return { schemaVersion: 1, id: 'synthetic', fixtures: { schema: 'schema.sql', seed: 'seed.sql', migration: 'migration.sql' }, images: { old: 'fixture:old', new: 'fixture:new' }, commands: { oldRead: ['node', '/app/contract.js', 'old-read'], newRead: ['node', '/app/contract.js', 'new-read'], newWrite: ['node', '/app/contract.js', 'new-write'] } };
@@ -72,6 +73,28 @@ test('keeps new writes in the rollback cell while other combinations get indepen
     assert.deepEqual(executor.events.filter(e => e[1] === 'old-read'), [[1, 'old-read', 'old'], [2, 'old-read', 'old'], [4, 'old-read', 'new']]);
     assert.equal(executor.events.filter(e => e[1] === 'destroy').length, 4);
   });
+});
+
+test('a backend label cannot turn injected observations into real execution evidence', async () => {
+  await withFiles(async root => {
+    const path = join(root, 'scenario.json');
+    const executor = {
+      ...backend(), kind: 'docker',
+      doctor: async () => ({ available: true }),
+      prepare: async scenario => ({ postgresImage: scenario.postgresImage, images: scenario.images }),
+    };
+    for (const report of [await rehearse(await loadScenario(path), executor), await runScenario(path, { backend: executor })]) {
+      assert.equal(exitCode(report), 0);
+      assert.equal(report.evidenceKind, 'simulated');
+    }
+  });
+});
+
+test('the rollback operation sequence cannot be shortened or replaced', () => {
+  const rollback = PHASES[3];
+  assert.throws(() => rollback.steps.splice(1, 1), TypeError);
+  assert.throws(() => { rollback.steps = ['old-read']; }, TypeError);
+  assert.deepEqual(rollback.steps, ['new-read', 'new-write', 'old-read']);
 });
 
 test('a successful migration cannot hide a rollback reader rejecting new-version data', async () => {

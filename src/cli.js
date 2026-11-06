@@ -4,7 +4,7 @@ import { runScenario, doctor } from './run.js';
 import { exitCode } from './rehearse.js';
 
 const HELP = `rolloutproof run --scenario <synthetic.json> [--json]
-rolloutproof doctor [--json]
+rolloutproof doctor [--scenario <synthetic.json>] [--json]
 
 Runs prebuilt application images only in disposable Docker cells.
 Exit: 0 declared contracts passed; 1 contract violation; 2 blocked/setup/cleanup failure; 3 incomplete.
@@ -13,8 +13,9 @@ try {
   const { values, positionals } = parseArgs({ options: { scenario: { type: 'string' }, json: { type: 'boolean' }, help: { type: 'boolean', short: 'h' } }, allowPositionals: true });
   if (values.help) { process.stdout.write(HELP); }
   else if (positionals.length === 1 && positionals[0] === 'doctor') {
-    const result = await doctor();
-    process.stdout.write(values.json ? `${JSON.stringify(result)}\n` : result.available ? `Docker available (${result.version})\n` : `BLOCKED: ${result.reason}\n`);
+    const result = await doctor(values.scenario);
+    const scope = result.scenarioId ? `; local images resolved for ${result.scenarioId}` : '';
+    process.stdout.write(values.json ? `${JSON.stringify(result)}\n` : result.available ? `Engine available (${result.version})${scope}\n` : `BLOCKED: ${result.reason}\n`);
     process.exitCode = result.available ? 0 : 2;
   } else if (positionals.length === 1 && positionals[0] === 'run' && values.scenario) {
     const report = await runScenario(values.scenario);

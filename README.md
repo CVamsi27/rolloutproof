@@ -6,56 +6,36 @@ Exercise old and new application contracts through PostgreSQL migration and roll
 
 Public alpha for synthetic/local testing. Use Node 24.22.1 (`.node-version`). Installation from source and local tarballs is supported; the scoped package names are not published to npm. [GitHub releases](https://github.com/CVamsi27/rolloutproof/releases) provide verified alpha tarballs when a release is available.
 
-## Clone and run
+## Install from GitHub
+
+Use Node 24.22.1 in a test project. Copy the shipped fixtures to a new directory so you can adapt them to your application contract.
 
 ```sh
-git clone https://github.com/CVamsi27/rolloutproof.git
-cd rolloutproof
-npm ci --ignore-scripts
-npm run check
-node src/cli.js --help
+npm install --save-dev --ignore-scripts https://github.com/CVamsi27/rolloutproof/releases/download/v0.1.0-alpha.1/developer-pain-lab-rolloutproof-0.1.0-alpha.1.tgz
+test ! -e ./rollout-example && cp -R node_modules/@developer-pain-lab/rolloutproof/examples ./rollout-example
 ```
 
-The example target must be new. Container-backed commands below require OrbStack and explicit local image preparation. They use the Docker-compatible CLI connected to OrbStack; Docker Desktop is not required. Missing engine, browser, image, collector or cleanup evidence remains a failure.
-
-To use a tarball in another project, download this project's `.tgz` from its release and run `npm install --save-dev /absolute/path/to/the-downloaded.tgz`. The installed tarball exposes `rolloutproof`; prepare application images and synthetic contracts explicitly.
-
-See [contributing](CONTRIBUTING.md), [security reporting](SECURITY.md), [changes](CHANGELOG.md) and [verification](docs/verification.md). Platform and adoption claims remain limited to recorded observations. The JavaScript API is ESM. This alpha supplies no TypeScript declarations for this package; CommonJS compatibility is not promised.
-
-An experimental PostgreSQL/image adapter for migration-first deployment rehearsals, including **an old reader against data written by the new application**. This is a local prototype, not a migration engine or a production safety certificate.
+Use the OrbStack steps below to prepare the local images. See [the pilot guide](docs/pilot.md), [contributing](CONTRIBUTING.md), and [verification](docs/verification.md).
 
 ## Current evidence
 
 On 5 November 2026 the real PostgreSQL suite passed on macOS arm64 with OrbStack: all four scenarios (16 cells), expected broken/fixed assertions, complete declared coverage and successful cleanup. Every migration applied successfully; the new-data rollback failure appeared only when the old reader consumed the new writer's data. These are synthetic observations, not performance, independent integration or adoption evidence. Control-boundary tests remain separate from real SQL execution.
 
-## Run the synthetic examples
-
-Requires Node 22+, a working Docker-compatible Linux-container engine, and the two local images below. From this standalone project folder:
+## Run the installed example on OrbStack
 
 ```sh
-npm ci --ignore-scripts
-npm run check
-npm run pack:check
-node src/cli.js --help
-node src/cli.js doctor --json
-
-# Explicit preparation; the rehearsal does not pull images or install dependencies.
-docker pull postgres:17-bookworm
-docker build --tag rolloutproof-fixture:local examples/fixture
-
-node src/cli.js run --scenario examples/rename.json --json
-node src/cli.js run --scenario examples/expand-contract.json --json
-node src/cli.js run --scenario examples/new-data-rollback.json --json
-node src/cli.js run --scenario examples/new-data-compatible.json --json
-npm run test:integration
-npm run measure
+orbctl start docker
+export CONTAINER_CLI=/absolute/path/to/docker
+export CONTAINER_HOST="unix://${HOME}/.orbstack/run/docker.sock"
+env -u DOCKER_CONTEXT DOCKER_HOST="$CONTAINER_HOST" "$CONTAINER_CLI" pull postgres:17-bookworm
+env -u DOCKER_CONTEXT DOCKER_HOST="$CONTAINER_HOST" "$CONTAINER_CLI" build --tag rolloutproof-fixture:local ./rollout-example/fixture
+npx --no-install rolloutproof doctor --scenario ./rollout-example/new-data-compatible.json --json
+npx --no-install rolloutproof run --scenario ./rollout-example/new-data-compatible.json --json
 ```
 
-For OrbStack on macOS, start its Linux engine with `orbctl start docker`, set `CONTAINER_CLI=/absolute/path/to/docker` to a Docker-compatible client and `CONTAINER_HOST="unix://${HOME}/.orbstack/run/docker.sock"` before the Node commands. For manual image commands, use `env -u DOCKER_CONTEXT DOCKER_HOST="$CONTAINER_HOST" "$CONTAINER_CLI"` in place of `docker` above. The endpoint is passed only to the client subprocess and overrides its `DOCKER_CONTEXT`; workers receive no host environment. Without overrides, normal `docker` client/context selection remains available. This macOS/OrbStack combination is verified; container profiles other than the tested OrbStack combination remain unverified; hosted source/package checks are listed below.
+`doctor` validates the scenario and contained SQL, then inspects the engine and resolves the three image roles to local immutable IDs. It exits 2 for invalid setup or unavailable prerequisites. Without `--scenario`, it checks engine availability only. The preflight is read-only.
 
-The broken cases should exit `1`; their corrected controls should exit `0`. Missing Docker/images exit `2` and remain unobserved. `measure` emits JSON with real per-phase wall time when executable, otherwise an explicit blocked gate with no measurements. It does not substitute simulated timings.
-
-For an independent local consumer, pack this package (`npm pack`), install the resulting `.tgz` in a new project, then use `npx rolloutproof --help`. The package has not been published to a registry.
+The compatible scenario exits 0. Run `new-data-rollback.json` to observe exit 1 when the old reader encounters the new writer's data. Use `rename.json` and `expand-contract.json` to compare the earlier old-code/new-schema failure with the compatible change. Source contributors can run `npm run check`, `npm run pack:check`, `npm run test:integration` and `npm run measure` from the checkout.
 
 ## What runs
 
@@ -93,7 +73,7 @@ console.log(report);
 process.exitCode = exitCode(report);
 ```
 
-The advanced `rehearse(loaded, backend)` seam supports orchestrator testing; a non-Docker backend is explicitly labelled `evidenceKind: simulated`. Only the real Docker runner produces observed image/SQL execution evidence. It cannot replace the container gate.
+The advanced `rehearse(loaded, backend)` seam supports orchestrator testing; injected backends are labelled `evidenceKind: simulated`. Observed image/SQL evidence comes from the internal runner used by `runScenario(path)`. It cannot replace the container gate.
 
 ## Isolation, cleanup and limits
 
